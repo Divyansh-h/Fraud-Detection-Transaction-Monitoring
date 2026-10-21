@@ -39,6 +39,11 @@ IF_SWEEP_CSV = REPORTS_DIR / "10_if_sweep.csv"
 ML_TEST_RESULTS_CSV = REPORTS_DIR / "11_ml_test_results.csv"
 ML_DIAGNOSTICS_MD = REPORTS_DIR / "12_ml_diagnostics.md"
 PHASE3_SUMMARY_MD = REPORTS_DIR / "13_phase3_summary.md"
+APPROACH_COMP_CSV = REPORTS_DIR / "14_approach_comparison.csv"
+APPROACH_COMP_MD = REPORTS_DIR / "14_approach_comparison.md"
+COST_ANALYSIS_CSV = REPORTS_DIR / "15_cost_analysis.csv"
+COST_ANALYSIS_MD = REPORTS_DIR / "15_cost_analysis.md"
+FINAL_METRICS_JSON = REPORTS_DIR / "16_final_metrics.json"
 SPLIT_ASSIGNMENT_PARQUET = PROCESSED_DATA_DIR / "split_assignment.parquet"
 ML_TRAIN_PARQUET = PROCESSED_DATA_DIR / "ml_train.parquet"
 ML_VAL_PARQUET = PROCESSED_DATA_DIR / "ml_val.parquet"
@@ -56,6 +61,26 @@ SQL_RULES_FILE = SQL_DIR / "02_rules.sql"
 RULE_FLAGS_PARQUET = OUTPUTS_DATA_DIR / "rule_flags.parquet"
 RULE_FLAGS_PREVIEW_CSV = OUTPUTS_DATA_DIR / "rule_flags_head1000.csv"
 ML_SCORES_PARQUET = OUTPUTS_DATA_DIR / "ml_scores.parquet"
+MASTER_ALERTS_PARQUET = OUTPUTS_DATA_DIR / "master_alerts.parquet"
+POWERBI_OUTPUT_DIR = OUTPUTS_DATA_DIR / "powerbi"
+FACT_TRANSACTIONS_CSV = POWERBI_OUTPUT_DIR / "fact_transactions.csv"
+DIM_TYPE_CSV = POWERBI_OUTPUT_DIR / "dim_type.csv"
+DIM_DAY_CSV = POWERBI_OUTPUT_DIR / "dim_day.csv"
+DIM_HOUR_CSV = POWERBI_OUTPUT_DIR / "dim_hour.csv"
+DIM_ALERT_SOURCE_CSV = POWERBI_OUTPUT_DIR / "dim_alert_source.csv"
+DIM_RISK_BAND_CSV = POWERBI_OUTPUT_DIR / "dim_risk_band.csv"
+DIM_AMOUNT_BAND_CSV = POWERBI_OUTPUT_DIR / "dim_amount_band.csv"
+AGG_BY_TYPE_CSV = POWERBI_OUTPUT_DIR / "agg_by_type.csv"
+AGG_BY_DAY_CSV = POWERBI_OUTPUT_DIR / "agg_by_day.csv"
+AGG_BY_HOUR_CSV = POWERBI_OUTPUT_DIR / "agg_by_hour.csv"
+AGG_BY_DAY_TYPE_CSV = POWERBI_OUTPUT_DIR / "agg_by_day_type.csv"
+AGG_BY_SOURCE_CSV = POWERBI_OUTPUT_DIR / "agg_by_source.csv"
+AGG_BY_RISK_BAND_CSV = POWERBI_OUTPUT_DIR / "agg_by_risk_band.csv"
+AGG_BY_AMOUNT_BAND_TYPE_CSV = POWERBI_OUTPUT_DIR / "agg_by_amount_band_type.csv"
+METRICS_OVERALL_CSV = POWERBI_OUTPUT_DIR / "metrics_overall.csv"
+METRICS_APPROACH_CSV = POWERBI_OUTPUT_DIR / "metrics_approach.csv"
+METRICS_RULES_CSV = POWERBI_OUTPUT_DIR / "metrics_rules.csv"
+CONFUSION_MATRIX_CSV = POWERBI_OUTPUT_DIR / "confusion_matrix.csv"
 
 # Saved Models and Thresholds
 MODEL_ISOLATION_FOREST = MODELS_DIR / "isolation_forest_baseline.joblib"
@@ -74,6 +99,7 @@ FIG_FRAUD_BY_HOUR = FIGURES_DIR / "06_fraud_by_hour.png"
 FIG_ORIG_EMPTIED = FIGURES_DIR / "07_orig_emptied_comparison.png"
 FIG_AVG_AMOUNT_BY_TYPE = FIGURES_DIR / "08_avg_amount_by_type.png"
 FIG_PR_CURVE_VAL = FIGURES_DIR / "pr_curve_val.png"
+FIG_APPROACH_COMP = FIGURES_DIR / "approach_comparison.png"
 
 
 # Core constants
@@ -109,6 +135,12 @@ RULE6_DEST_UNCHANGED_MIN_AMOUNT = 10000.0  # Transfer amount >= 10,000
 RULE7_BALANCE_ERROR_TOLERANCE = 0.01  # abs(errOrig) > 0.01 and abs(errDest) > 0.01
 RULE_ALERT_THRESHOLD_1 = 1  # Alert score >= 1
 RULE_ALERT_THRESHOLD_2 = 2  # Alert score >= 2
+
+# Official Production / Dashboard Alert Definition
+# Combined OR strategy ('combo_or') is selected as the official dashboard alert definition
+# to guarantee maximal fraud recall (99.79%, 8,196 / 8,213 frauds detected, missing only 17)
+# as an exhaustive supervisory safety net across all monitoring pipelines.
+ALERT_DEFINITION = "combo_or"
 
 # Column definitions
 COL_STEP = "step"

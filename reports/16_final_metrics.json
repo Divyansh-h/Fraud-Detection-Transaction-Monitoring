@@ -1,0 +1,45 @@
+{
+  "alert_definition": "combo_or",
+  "total_transactions": 6362620,
+  "total_alerts": 1085609,
+  "total_flagged_value": 407883914866.3,
+  "fraud_count": 8213,
+  "overall_fraud_rate": 0.001290820448180152,
+  "TP": 8196,
+  "FP": 1077413,
+  "FN": 17,
+  "TN": 5276994,
+  "precision": 0.007549679488655676,
+  "recall": 0.9979301107999513,
+  "FPR": 0.16955366566856672,
+  "fpr": 0.16955366566856672,
+  "F1": 0.014985984922592522,
+  "f1": 0.014985984922592522,
+  "fraud_rate_by_type": {
+    "CASH_IN": {
+      "transactions": 1399284,
+      "fraud_count": 0,
+      "fraud_rate": 0.0
+    },
+    "CASH_OUT": {
+      "transactions": 2237500,
+      "fraud_count": 4116,
+      "fraud_rate": 0.0018395530726256983
+    },
+    "DEBIT": {
+      "transactions": 41432,
+      "fraud_count": 0,
+      "fraud_rate": 0.0
+    },
+    "PAYMENT": {
+      "transactions": 2151495,
+      "fraud_count": 0,
+      "fraud_rate": 0.0
+    },
+    "TRANSFER": {
+      "transactions": 532909,
+      "fraud_count": 4097,
+      "fraud_rate": 0.007687991758442811
+    }
+  }
+}
