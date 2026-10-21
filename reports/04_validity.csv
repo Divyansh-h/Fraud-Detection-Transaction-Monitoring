@@ -1,0 +1,9 @@
+check_name,count,pct_of_rows,count_in_fraud,comment
+1. Negative amounts or balances in any column,0,0.0,0,No negative monetary amounts or balances exist; dataset respects non-negative domain rules.
+2. Transactions with amount == 0,16,0.000251468734577894,16,"Exactly 16 zero-amount rows exist, and 100% are fraudulent CASH_OUT attempts on drained accounts."
+3. Sender oldbalanceOrg == 0 while amount > 0,2102433,33.04351037780034,25,"Over 2.1M transactions have zero sender balance; frequent in legitimate cash-ins/payments, rare in fraud (25 cases)."
+4. Overdraft: newbalanceOrig < 0 or amount > oldbalanceOrg,4079080,64.11006786512475,29,"Simulator clamps newbalanceOrig at 0 without negative balances; 64.1% of transactions show amount > old balance, but only 29 frauds exhibit this."
+"5. Receiver old & new balance both 0 (non-merchant, amount > 0)",165781,2.6055461429411153,4070,"Recipient balances remain 0.0 despite funds sent; strong fraud indicator (captures 4,070 fraud cases, 49.56% of total fraud)."
+6. TRANSFER or CASH_OUT with amount > oldbalanceOrg,2488634,39.11335267547017,29,Common in legitimate activity (39.1%) due to missing initial balances; rare in fraud (only 29 fraud cases) where exact balance is drained.
+7. Simulator rule flag: isFlaggedFraud == 1,16,0.000251468734577894,16,"Extremely weak heuristic: fires on only 16 rows (100% precision, but 0.19% recall; misses 99.81% of fraud); only triggers on TRANSFER >= $353,874.22."
+"8. Fraud in CASH_IN, DEBIT, or PAYMENT (expected 0)",0,0.0,0,"Zero fraud instances exist in CASH_IN, DEBIT, or PAYMENT; confirms fraud is strictly confined to TRANSFER and CASH_OUT."
