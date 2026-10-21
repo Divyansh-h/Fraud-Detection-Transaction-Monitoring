@@ -34,7 +34,15 @@ IMBALANCE_REPORT_MD = REPORTS_DIR / "06_imbalance_strategy.md"
 PHASE1_SUMMARY_MD = REPORTS_DIR / "07_phase1_summary.md"
 RULE_EVAL_CSV = REPORTS_DIR / "08_rule_evaluation.csv"
 RULE_EVAL_MD = REPORTS_DIR / "08_rule_evaluation.md"
+ML_DATA_NOTES_MD = REPORTS_DIR / "09_ml_data_notes.md"
+IF_SWEEP_CSV = REPORTS_DIR / "10_if_sweep.csv"
+ML_TEST_RESULTS_CSV = REPORTS_DIR / "11_ml_test_results.csv"
+ML_DIAGNOSTICS_MD = REPORTS_DIR / "12_ml_diagnostics.md"
+PHASE3_SUMMARY_MD = REPORTS_DIR / "13_phase3_summary.md"
 SPLIT_ASSIGNMENT_PARQUET = PROCESSED_DATA_DIR / "split_assignment.parquet"
+ML_TRAIN_PARQUET = PROCESSED_DATA_DIR / "ml_train.parquet"
+ML_VAL_PARQUET = PROCESSED_DATA_DIR / "ml_val.parquet"
+ML_TEST_PARQUET = PROCESSED_DATA_DIR / "ml_test.parquet"
 
 # DuckDB Database path
 DB_PATH = PROCESSED_DATA_DIR / "fraud.duckdb"
@@ -47,6 +55,15 @@ SQL_RULES_FILE = SQL_DIR / "02_rules.sql"
 # Output files
 RULE_FLAGS_PARQUET = OUTPUTS_DATA_DIR / "rule_flags.parquet"
 RULE_FLAGS_PREVIEW_CSV = OUTPUTS_DATA_DIR / "rule_flags_head1000.csv"
+ML_SCORES_PARQUET = OUTPUTS_DATA_DIR / "ml_scores.parquet"
+
+# Saved Models and Thresholds
+MODEL_ISOLATION_FOREST = MODELS_DIR / "isolation_forest_baseline.joblib"
+MODEL_ISOLATION_FOREST_FINAL = MODELS_DIR / "isolation_forest_final.joblib"
+MODEL_FINAL_JOBLIB = MODELS_DIR / "isolation_forest.joblib"
+MODEL_METADATA_JSON = MODELS_DIR / "model_metadata.json"
+THRESHOLDS_JSON = MODELS_DIR / "thresholds.json"
+BEST_CONFIG_JSON = MODELS_DIR / "best_config.json"
 
 FIG_HIST_AMOUNT = FIGURES_DIR / "01_amount_distribution_by_fraud.png"
 FIG_BOXPLOT_AMOUNT = FIGURES_DIR / "02_amount_boxplot_by_type.png"
@@ -56,6 +73,8 @@ FIG_FRAUD_PER_DAY = FIGURES_DIR / "05_fraud_count_per_day.png"
 FIG_FRAUD_BY_HOUR = FIGURES_DIR / "06_fraud_by_hour.png"
 FIG_ORIG_EMPTIED = FIGURES_DIR / "07_orig_emptied_comparison.png"
 FIG_AVG_AMOUNT_BY_TYPE = FIGURES_DIR / "08_avg_amount_by_type.png"
+FIG_PR_CURVE_VAL = FIGURES_DIR / "pr_curve_val.png"
+
 
 # Core constants
 RANDOM_SEED = 42
@@ -123,6 +142,34 @@ COL_IS_DUPLICATE_ROW = "isDuplicateRow"
 # Outlier feature column names
 COL_IS_AMOUNT_OUTLIER_IQR = "isAmountOutlierIQR"
 COL_IS_TOP_1PCT_AMOUNT = "isTop1PctAmount"
+
+# Machine Learning Feature Column Names
+FEATURE_COLUMNS = [
+    "logAmt",
+    "isTransfer",
+    "logOldOrg",
+    "logNewOrig",
+    "logOldDest",
+    "logNewDest",
+    "errOrig_signed",
+    "errDest_signed",
+    "origEmptied",
+    "destBalanceUnchanged",
+    "destIsMerchant",
+    "amtToBalanceRatio",
+    "hour",
+]
+
+# Forbidden columns that must NEVER be used as model features
+FORBIDDEN_LEAKAGE_COLUMNS = [
+    "isFraud",
+    "isFlaggedFraud",
+    "nameOrig",
+    "nameDest",
+    "txn_id",
+    "step",
+    "day",
+]
 
 ALL_COLUMNS = [
     COL_STEP,

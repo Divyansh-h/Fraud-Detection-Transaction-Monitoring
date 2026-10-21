@@ -1,0 +1,15 @@
+{
+  "n_estimators": 100,
+  "max_samples": 1024,
+  "contamination": 0.003,
+  "feature_set": "A",
+  "pr_auc": 0.761973,
+  "roc_auc": 0.995961,
+  "precision": 0.634788,
+  "recall": 0.646379,
+  "fpr": 0.001106,
+  "f1": 0.640531,
+  "train_seconds": 1.366,
+  "selection_metric": "validation_pr_auc",
+  "tie_breaker": "higher_f1_then_shorter_train_seconds"
+}

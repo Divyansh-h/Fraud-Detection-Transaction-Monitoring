@@ -21,6 +21,7 @@ data/outputs/*
 # Models
 models/*
 !models/.gitkeep
+!models/*.json
 
 # OS files
 .DS_Store

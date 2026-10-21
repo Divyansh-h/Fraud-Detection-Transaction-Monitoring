@@ -1,0 +1,56 @@
+{
+  "sklearn_version": "1.9.1",
+  "training_date": "2026-10-21T16:00:11.606209+00:00",
+  "config_used": {
+    "n_estimators": 100,
+    "max_samples": 1024,
+    "contamination": 0.003,
+    "feature_set": "A",
+    "pr_auc": 0.761973,
+    "roc_auc": 0.995961,
+    "precision": 0.634788,
+    "recall": 0.646379,
+    "fpr": 0.001106,
+    "f1": 0.640531,
+    "train_seconds": 1.366,
+    "selection_metric": "validation_pr_auc",
+    "tie_breaker": "higher_f1_then_shorter_train_seconds"
+  },
+  "feature_columns": [
+    "logAmt",
+    "isTransfer",
+    "logOldOrg",
+    "logNewOrig",
+    "logOldDest",
+    "logNewDest",
+    "errOrig_signed",
+    "errDest_signed",
+    "origEmptied",
+    "destBalanceUnchanged",
+    "destIsMerchant",
+    "amtToBalanceRatio",
+    "hour"
+  ],
+  "FEATURE_COLUMNS": [
+    "logAmt",
+    "isTransfer",
+    "logOldOrg",
+    "logNewOrig",
+    "logOldDest",
+    "logNewDest",
+    "errOrig_signed",
+    "errDest_signed",
+    "origEmptied",
+    "destBalanceUnchanged",
+    "destIsMerchant",
+    "amtToBalanceRatio",
+    "hour"
+  ],
+  "thresholds": {
+    "best_f1": 0.7040093962516094,
+    "high_recall_p50": 0.6626669438192209,
+    "high_precision_r80": 0.5928570746195522
+  },
+  "train_row_count": 1662245,
+  "random_seed": 42
+}
