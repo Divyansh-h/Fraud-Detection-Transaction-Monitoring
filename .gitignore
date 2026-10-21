@@ -16,6 +16,7 @@ data/processed/*
 !data/processed/.gitkeep
 data/outputs/*
 !data/outputs/.gitkeep
+!data/outputs/*.csv
 
 # Models
 models/*

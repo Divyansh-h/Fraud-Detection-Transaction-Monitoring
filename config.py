@@ -32,7 +32,21 @@ VALIDITY_REPORT_CSV = REPORTS_DIR / "04_validity.csv"
 OUTLIERS_REPORT_MD = REPORTS_DIR / "05_outliers.md"
 IMBALANCE_REPORT_MD = REPORTS_DIR / "06_imbalance_strategy.md"
 PHASE1_SUMMARY_MD = REPORTS_DIR / "07_phase1_summary.md"
+RULE_EVAL_CSV = REPORTS_DIR / "08_rule_evaluation.csv"
+RULE_EVAL_MD = REPORTS_DIR / "08_rule_evaluation.md"
 SPLIT_ASSIGNMENT_PARQUET = PROCESSED_DATA_DIR / "split_assignment.parquet"
+
+# DuckDB Database path
+DB_PATH = PROCESSED_DATA_DIR / "fraud.duckdb"
+
+# SQL files
+SQL_LOAD_FILE = SQL_DIR / "01_load.sql"
+SQL_VERIFY_FILE = SQL_DIR / "00_verify.sql"
+SQL_RULES_FILE = SQL_DIR / "02_rules.sql"
+
+# Output files
+RULE_FLAGS_PARQUET = OUTPUTS_DATA_DIR / "rule_flags.parquet"
+RULE_FLAGS_PREVIEW_CSV = OUTPUTS_DATA_DIR / "rule_flags_head1000.csv"
 
 FIG_HIST_AMOUNT = FIGURES_DIR / "01_amount_distribution_by_fraud.png"
 FIG_BOXPLOT_AMOUNT = FIGURES_DIR / "02_amount_boxplot_by_type.png"
@@ -50,6 +64,7 @@ ALL_TYPES = ["CASH_IN", "CASH_OUT", "DEBIT", "PAYMENT", "TRANSFER"]
 
 EXPECTED_ROWS = 6362620
 EXPECTED_FRAUD = 8213
+EXPECTED_SCOPED_ROWS = 2770409
 
 # Train / Validation / Test stratified split ratios
 TRAIN_RATIO = 0.60
@@ -63,6 +78,18 @@ COL_SPLIT = "split"
 
 # Balance consistency threshold
 BALANCE_ERR_TOLERANCE = 0.01
+
+# Business rule engine thresholds
+RULE2_AMOUNT_PERCENTILE_THRESHOLD = 0.99
+RULE3_VELOCITY_WINDOW_STEPS = 5  # RANGE BETWEEN 5 PRECEDING AND CURRENT ROW (6-hour rolling window)
+RULE3_VELOCITY_THRESHOLD = 3     # txns_last_6h >= 3
+RULE4_TRANSFER_CASHOUT_WINDOW_STEPS = 24  # Max 24 steps (24 hours) between transfer and cashout
+RULE4_TRANSFER_CASHOUT_AMT_TOLERANCE = 0.10  # Cashout amount within 10% of transfer amount
+RULE5_MULE_DEST_SENDERS_THRESHOLD = 3  # Distinct senders to destination per day >= 3
+RULE6_DEST_UNCHANGED_MIN_AMOUNT = 10000.0  # Transfer amount >= 10,000
+RULE7_BALANCE_ERROR_TOLERANCE = 0.01  # abs(errOrig) > 0.01 and abs(errDest) > 0.01
+RULE_ALERT_THRESHOLD_1 = 1  # Alert score >= 1
+RULE_ALERT_THRESHOLD_2 = 2  # Alert score >= 2
 
 # Column definitions
 COL_STEP = "step"
