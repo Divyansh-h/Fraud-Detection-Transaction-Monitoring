@@ -1,6 +1,6 @@
 {
   "sklearn_version": "1.9.1",
-  "training_date": "2026-10-21T16:00:11.606209+00:00",
+  "training_date": "2026-10-22T16:58:51.941999+00:00",
   "config_used": {
     "n_estimators": 100,
     "max_samples": 1024,
@@ -12,7 +12,7 @@
     "recall": 0.646379,
     "fpr": 0.001106,
     "f1": 0.640531,
-    "train_seconds": 1.366,
+    "train_seconds": 1.38,
     "selection_metric": "validation_pr_auc",
     "tie_breaker": "higher_f1_then_shorter_train_seconds"
   },

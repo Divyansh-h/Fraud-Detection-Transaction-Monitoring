@@ -1,7 +1,7 @@
 # Transaction Monitoring Strategy Comparison: Rules vs. ML vs. Hybrid Architectures
 
 **Document ID:** `14_approach_comparison.md`  
-**Execution Timestamp:** 2026-10-21 22:26:04 UTC  
+**Execution Timestamp:** 2026-10-22 16:59:12 UTC  
 **Master Dataset:** `data/outputs/master_alerts.parquet` ($N = 6,362,620$ transactions)  
 **Modeling Scope:** `TRANSFER` and `CASH_OUT` only ($N = 2,770,409$, Fraud Events = 8,213)  
 **Evaluation Standard:** Binary metrics computed via `evaluate_binary()` from `src/evaluation.py`  

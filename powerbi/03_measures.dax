@@ -1,0 +1,413 @@
+// =============================================================================
+// POWER BI DAX MEASURES LIBRARY: TRANSACTION SURVEILLANCE & FRAUD MONITORING
+// =============================================================================
+// Document ID: powerbi/03_measures.dax
+// Total Measures: 34
+// Verification Standard: 100% Programmatically verified against source CSV headers
+// Generator: src/build_measures_dax.py
+// =============================================================================
+
+/*
+================================================================================
+INSTRUCTIONS FOR HOSTING MEASURES IN A DEDICATED '_Measures' TABLE
+================================================================================
+To keep your Power BI field list tidy and ensure all measures appear together
+at the very top of the Data pane with a distinct calculator icon, follow these steps:
+
+1. CREATE THE DEDICATED TABLE:
+   - In Power BI Desktop, go to the 'Home' ribbon tab.
+   - Click 'Enter Data'.
+   - In the Create Table window, name the single column 'Dummy'.
+   - In the bottom-right 'Name' box, enter exactly: _Measures
+   - Click 'Load'.
+
+2. ADD THE MEASURES:
+   - In the Data pane on the right rail, right-click '_Measures' > 'New Measure'.
+   - Copy and paste the DAX measure code from this file.
+   - Set the Format string in the top ribbon (Measure Tools).
+
+3. ORGANIZE INTO DISPLAY FOLDERS:
+   - Switch to 'Model View' (diagram icon on the left rail).
+   - Select the '_Measures' table, then select a measure.
+   - In the Properties pane on the right, locate 'Display folder'.
+   - Enter the exact folder name specified in the measure comment
+     (e.g. '01 - Enterprise Volumes & KPIs', '02 - Fraud & Alert Exposure ($)', etc.).
+
+4. HIDE THE DUMMY COLUMN (THE CALCULATOR ICON TRICK):
+   - In the Data pane, right-click the 'Dummy' column in '_Measures' > 'Hide'.
+   - Collapse the Data pane using the '>' arrow and re-expand it.
+   - Power BI will recognize that '_Measures' contains only measures, change its
+     table icon to a calculator symbol, and automatically move it to the very
+     top of your field list!
+================================================================================
+*/
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 01 - Enterprise Volumes & KPIs
+// -----------------------------------------------------------------------------
+
+// Measure: [Total Transactions]
+// Display Folder: 01 - Enterprise Volumes & KPIs
+// Format String: #,##0
+// Description: Total enterprise transaction volume sourced from pre-aggregated 6.36M ground truth.
+[Total Transactions] = 
+    SUM(Agg_ByType[total_txns])
+
+
+// Measure: [Total Alerts]
+// Display Folder: 01 - Enterprise Volumes & KPIs
+// Format String: #,##0
+// Description: Total alerts flagged across enterprise under official Combined OR definition (1,085,609).
+[Total Alerts] = 
+    SUM(Agg_ByType[alert_count])
+
+
+// Measure: [Fraud Count]
+// Display Folder: 01 - Enterprise Volumes & KPIs
+// Format String: #,##0
+// Description: Total confirmed fraudulent transactions across enterprise (8,213 ground truth census).
+[Fraud Count] = 
+    SUM(Agg_ByType[fraud_count])
+
+
+// Measure: [Fraud Rate %]
+// Display Folder: 01 - Enterprise Volumes & KPIs
+// Format String: 0.000%
+// Description: Enterprise baseline fraud prevalence rate (8,213 / 6,362,620 = 0.129%).
+[Fraud Rate %] = 
+    DIVIDE([Fraud Count], [Total Transactions], 0)
+
+
+// Measure: [Alert Rate %]
+// Display Folder: 01 - Enterprise Volumes & KPIs
+// Format String: 0.00%
+// Description: Percentage of total enterprise transactions flagged for investigator triage (17.06%).
+[Alert Rate %] = 
+    DIVIDE([Total Alerts], [Total Transactions], 0)
+
+
+// Measure: [Total Legitimate Volume]
+// Display Folder: 01 - Enterprise Volumes & KPIs
+// Format String: #,##0
+// Description: Total enterprise legitimate unalerted transactions (6,354,407 non-fraud rows).
+[Total Legitimate Volume] = 
+    [Total Transactions] - [Fraud Count]
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 02 - Fraud & Alert Exposure ($)
+// -----------------------------------------------------------------------------
+
+// Measure: [Total Flagged Value]
+// Display Folder: 02 - Fraud & Alert Exposure ($)
+// Format String: $#,##0
+// Description: Total currency value of transactions flagged by alerts ($407,883,914,866.30 across enterprise).
+[Total Flagged Value] = 
+    SUM(Agg_ByType[flagged_value])
+
+
+// Measure: [Total Amount ($)]
+// Display Folder: 02 - Fraud & Alert Exposure ($)
+// Format String: $#,##0
+// Description: Total enterprise transaction currency volume across all 5 payment types ($1.14 Trillion).
+[Total Amount ($)] = 
+    SUM(Agg_ByType[total_amount])
+
+
+// Measure: [Avg Alert Amount]
+// Display Folder: 02 - Fraud & Alert Exposure ($)
+// Format String: $#,##0
+// Description: Average transaction currency value among all generated alerts.
+[Avg Alert Amount] = 
+    DIVIDE([Total Flagged Value], [Total Alerts], 0)
+
+
+// Measure: [Missed Fraud Value]
+// Display Folder: 02 - Fraud & Alert Exposure ($)
+// Format String: $#,##0
+// Description: Total currency amount of false negative fraud events missed by alerts. Sourced from Fact_Transactions where outcome = 'False Negative' (exact, as fact table contains 100% of fraud).
+[Missed Fraud Value] = 
+    CALCULATE(SUM(Fact_Transactions[amount]), Fact_Transactions[outcome] = "False Negative")
+
+
+// Measure: [Caught Fraud Value]
+// Display Folder: 02 - Fraud & Alert Exposure ($)
+// Format String: $#,##0
+// Description: Total currency amount of successfully detected fraud (outcome = 'True Positive') in Fact_Transactions (exact, as fact table contains 100% of fraud).
+[Caught Fraud Value] = 
+    CALCULATE(SUM(Fact_Transactions[amount]), Fact_Transactions[outcome] = "True Positive")
+
+
+// Measure: [Total Fraud Exposure ($)]
+// Display Folder: 02 - Fraud & Alert Exposure ($)
+// Format String: $#,##0
+// Description: Total gross currency value of all confirmed fraudulent transactions ($12.06 Billion).
+[Total Fraud Exposure ($)] = 
+    [Caught Fraud Value] + [Missed Fraud Value]
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 03 - Classification & Performance Metrics
+// -----------------------------------------------------------------------------
+
+// Measure: [True Positives]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: #,##0
+// Description: Confirmed fraudulent transactions correctly flagged by surveillance (TP = 8,196).
+[True Positives] = 
+    SUM(Agg_ByType[tp])
+
+
+// Measure: [False Positives]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: #,##0
+// Description: Legitimate transactions erroneously flagged as fraud alarms (FP = 1,077,413).
+[False Positives] = 
+    SUM(Agg_ByType[fp])
+
+
+// Measure: [False Negatives]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: #,##0
+// Description: Fraudulent transactions missed by official surveillance alerts (FN = 17).
+[False Negatives] = 
+    SUM(Agg_ByType[fn])
+
+
+// Measure: [True Negatives]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: #,##0
+// Description: Legitimate transactions correctly passed without generating alarms (TN = 5,276,994).
+[True Negatives] = 
+    SUM(Agg_ByType[tn])
+
+
+// Measure: [Precision]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: 0.00%
+// Description: Alert investigation hit rate: TP / (TP + FP) = 0.755% under maximal recall Combined OR.
+[Precision] = 
+    DIVIDE([True Positives], [True Positives] + [False Positives], 0)
+
+
+// Measure: [Recall]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: 0.00%
+// Description: Fraud capture coverage rate: TP / (TP + FN) = 99.793% (detects 8,196 of 8,213 frauds).
+[Recall] = 
+    DIVIDE([True Positives], [True Positives] + [False Negatives], 0)
+
+
+// Measure: [False Positive Rate]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: 0.00%
+// Description: Fall-out proportion of legitimate transactions flagged: FP / (FP + TN) = 16.955%.
+[False Positive Rate] = 
+    DIVIDE([False Positives], [False Positives] + [True Negatives], 0)
+
+
+// Measure: [F1 Score]
+// Display Folder: 03 - Classification & Performance Metrics
+// Format String: 0.0000
+// Description: Harmonic mean of precision and recall: 2 * (Prec * Rec) / (Prec + Rec).
+[F1 Score] = 
+    VAR Prec = [Precision]
+    VAR Rec = [Recall]
+    RETURN
+        DIVIDE(2 * Prec * Rec, Prec + Rec, 0)
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 04 - Dimension Specific Rates
+// -----------------------------------------------------------------------------
+
+// Measure: [Fraud Rate % by Type]
+// Display Folder: 04 - Dimension Specific Rates
+// Format String: 0.000%
+// Description: Context-aware fraud rate evaluated per payment type slice along Dim_Type[type] (TRANSFER = 0.769%, CASH_OUT = 0.184%, others = 0.000%).
+[Fraud Rate % by Type] = 
+    DIVIDE(SUM(Agg_ByType[fraud_count]), SUM(Agg_ByType[total_txns]), 0)
+
+
+// Measure: [Alert Rate % by Type]
+// Display Folder: 04 - Dimension Specific Rates
+// Format String: 0.00%
+// Description: Context-aware alert rate evaluated per payment type slice along Dim_Type[type] (TRANSFER = 41.33%, CASH_OUT = 38.68%, others = 0.00%).
+[Alert Rate % by Type] = 
+    DIVIDE(SUM(Agg_ByType[alert_count]), SUM(Agg_ByType[total_txns]), 0)
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 05 - Alert Attribution (Source & Triage)
+// -----------------------------------------------------------------------------
+
+// Measure: [Alerts Both]
+// Display Folder: 05 - Alert Attribution (Source & Triage)
+// Format String: #,##0
+// Description: High-consensus alerts flagged by BOTH heuristic SQL rules AND ML Isolation Forest (4,224 txns, 98.65% precision).
+[Alerts Both] = 
+    CALCULATE(SUM(Agg_BySource[alert_count]), Agg_BySource[alert_source] = "Both")
+
+
+// Measure: [Alerts Rule Only]
+// Display Folder: 05 - Alert Attribution (Source & Triage)
+// Format String: #,##0
+// Description: Alerts flagged exclusively by heuristic SQL rules (1,081,330 txns, 0.37% precision).
+[Alerts Rule Only] = 
+    CALCULATE(SUM(Agg_BySource[alert_count]), Agg_BySource[alert_source] = "Rule only")
+
+
+// Measure: [Alerts ML Only]
+// Display Folder: 05 - Alert Attribution (Source & Triage)
+// Format String: #,##0
+// Description: Alerts flagged exclusively by ML Isolation Forest, catching missed rule fraud (55 txns, 6 frauds, 10.91% precision).
+[Alerts ML Only] = 
+    CALCULATE(SUM(Agg_BySource[alert_count]), Agg_BySource[alert_source] = "ML only")
+
+
+// Measure: [Consensus Precision %]
+// Display Folder: 05 - Alert Attribution (Source & Triage)
+// Format String: 0.00%
+// Description: Precision hit rate for high-confidence Consensus alerts ('Both' source = 98.65%).
+[Consensus Precision %] = 
+    DIVIDE(CALCULATE(SUM(Agg_BySource[fraud_caught]), Agg_BySource[alert_source] = "Both"), [Alerts Both], 0)
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 06 - Investigator Workbench & Ranking
+// -----------------------------------------------------------------------------
+
+// Measure: [Alert Rank]
+// Display Folder: 06 - Investigator Workbench & Ranking
+// Format String: #,##0
+// Description: Dynamic ordinal priority rank (1 = highest risk) of transactions by combo_score for Top N table filtering in investigator workbench.
+[Alert Rank] = 
+    IF(
+        NOT(ISBLANK(SELECTEDVALUE(Fact_Transactions[txn_id]))),
+        RANKX(
+            ALLSELECTED(Fact_Transactions),
+            CALCULATE(MAX(Fact_Transactions[combo_score])),
+            ,
+            DESC,
+            Dense
+        )
+    )
+
+
+// Measure: [High Risk Alert Count]
+// Display Folder: 06 - Investigator Workbench & Ranking
+// Format String: #,##0
+// Description: Count of transactions classified into the 'High' or 'Critical' risk bands in Fact_Transactions.
+[High Risk Alert Count] = 
+    CALCULATE(COUNTROWS(Fact_Transactions), Fact_Transactions[risk_band] IN {"Critical", "High"})
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 07 - Dynamic Visual Titles
+// -----------------------------------------------------------------------------
+
+// Measure: [Dynamic Title - Selected Type]
+// Display Folder: 07 - Dynamic Visual Titles
+// Format String: Text
+// Description: Generates dynamic visual title reflecting currently filtered payment type(s).
+[Dynamic Title - Selected Type] = 
+    VAR SelectedCount = COUNTROWS(VALUES(Dim_Type[type]))
+    VAR TotalCount = COUNTROWS(ALL(Dim_Type[type]))
+    RETURN
+        IF(
+            SelectedCount = TotalCount,
+            "All Payment Methods",
+            IF(
+                SelectedCount = 1,
+                SELECTEDVALUE(Dim_Type[type]),
+                CONCATENATEX(VALUES(Dim_Type[type]), Dim_Type[type], ", ")
+            )
+        )
+
+
+// Measure: [Dynamic Title - Selected Day]
+// Display Folder: 07 - Dynamic Visual Titles
+// Format String: Text
+// Description: Generates dynamic visual title reflecting currently filtered calendar simulation day(s).
+[Dynamic Title - Selected Day] = 
+    VAR SelectedCount = COUNTROWS(VALUES(Dim_Day[day_label]))
+    VAR TotalCount = COUNTROWS(ALL(Dim_Day[day_label]))
+    RETURN
+        IF(
+            SelectedCount = TotalCount,
+            "Entire 31-Day Period",
+            IF(
+                SelectedCount = 1,
+                SELECTEDVALUE(Dim_Day[day_label]),
+                CONCATENATEX(VALUES(Dim_Day[day_label]), Dim_Day[day_label], ", ")
+            )
+        )
+
+
+// Measure: [Dynamic Title - Selected Risk Band]
+// Display Folder: 07 - Dynamic Visual Titles
+// Format String: Text
+// Description: Generates dynamic visual title reflecting currently filtered risk tier(s).
+[Dynamic Title - Selected Risk Band] = 
+    VAR SelectedCount = COUNTROWS(VALUES(Dim_RiskBand[risk_band]))
+    VAR TotalCount = COUNTROWS(ALL(Dim_RiskBand[risk_band]))
+    RETURN
+        IF(
+            SelectedCount = TotalCount,
+            "All Risk Tiers",
+            IF(
+                SelectedCount = 1,
+                SELECTEDVALUE(Dim_RiskBand[risk_band]),
+                CONCATENATEX(VALUES(Dim_RiskBand[risk_band]), Dim_RiskBand[risk_band], ", ")
+            )
+        )
+
+
+// -----------------------------------------------------------------------------
+// DISPLAY FOLDER: 08 - Conditional Formatting (Colors)
+// -----------------------------------------------------------------------------
+
+// Measure: [Color - Precision KPI Card]
+// Display Folder: 08 - Conditional Formatting (Colors)
+// Format String: Hex Color String
+// Description: Conditional hex color string for Precision KPI card (Green >= 90%, Amber >= 50%, Red < 50%).
+[Color - Precision KPI Card] = 
+    VAR Prec = [Precision]
+    RETURN
+        SWITCH(
+            TRUE(),
+            Prec >= 0.90, "#2ECC71",  // Emerald Green
+            Prec >= 0.50, "#F1C40F",  // Amber
+            "#E74C3C"                 // Coral Red
+        )
+
+
+// Measure: [Color - Recall KPI Card]
+// Display Folder: 08 - Conditional Formatting (Colors)
+// Format String: Hex Color String
+// Description: Conditional hex color string for Recall KPI card (Green >= 99%, Amber >= 90%, Red < 90%).
+[Color - Recall KPI Card] = 
+    VAR Rec = [Recall]
+    RETURN
+        SWITCH(
+            TRUE(),
+            Rec >= 0.99, "#2ECC71",   // Emerald Green (Target 99.79% hit)
+            Rec >= 0.90, "#F1C40F",   // Amber
+            "#E74C3C"                 // Coral Red (Unacceptable fraud leakage)
+        )
+
+
+// Measure: [Color - Alert Rate KPI Card]
+// Display Folder: 08 - Conditional Formatting (Colors)
+// Format String: Hex Color String
+// Description: Conditional hex color string for Alert Rate KPI card (Green <= 5%, Amber <= 20%, Red > 20%).
+[Color - Alert Rate KPI Card] = 
+    VAR Rate = [Alert Rate %]
+    RETURN
+        SWITCH(
+            TRUE(),
+            Rate <= 0.05, "#2ECC71",  // Emerald Green
+            Rate <= 0.20, "#F1C40F",  // Amber (Current Combined OR is 17.06%)
+            "#E74C3C"                 // Coral Red (Extreme operational strain)
+        )
+

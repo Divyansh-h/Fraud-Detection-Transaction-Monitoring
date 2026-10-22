@@ -1,6 +1,7 @@
 """Unit tests for Phase 4 master alerts dataset construction."""
 
 from pathlib import Path
+import re
 import pytest
 import pandas as pd
 import numpy as np
@@ -462,10 +463,365 @@ def test_alert_source_strictly_four_allowed_values():
     df_agg = pd.read_csv(config.AGG_BY_SOURCE_CSV, keep_default_na=False)
     assert set(df_agg["alert_source"].unique()) == allowed
 
+def test_powerbi_import_guide_exists_and_complete():
+    """Assert powerbi/01_import_guide.md exists, covers all 18 tables, and includes key instructions."""
+    guide_path = config.POWERBI_DIR / "01_import_guide.md"
+    assert guide_path.exists(), f"Missing {guide_path}"
+    assert guide_path.stat().st_size > 10000, f"Guide file too small: {guide_path.stat().st_size} bytes"
+
+    content = guide_path.read_text(encoding="utf-8")
+
+    # Key instructions
+    assert "DataFolder" in content
+    assert "Auto date/time" in content
+    assert "Don't summarize" in content
+    assert "Get Data" in content or "Text/CSV" in content
+
+    # All 18 Power BI table names
+    expected_tables = [
+        "Fact_Transactions",
+        "Dim_Type",
+        "Dim_Day",
+        "Dim_Hour",
+        "Dim_AlertSource",
+        "Dim_RiskBand",
+        "Dim_AmountBand",
+        "Agg_ByType",
+        "Agg_ByDay",
+        "Agg_ByHour",
+        "Agg_ByDayType",
+        "Agg_BySource",
+        "Agg_ByRiskBand",
+        "Agg_ByAmountBandType",
+        "Metrics_Overall",
+        "Metrics_Approach",
+        "Metrics_Rules",
+        "Confusion_Matrix",
+    ]
+    for tbl in expected_tables:
+        assert tbl in content, f"Table '{tbl}' missing from 01_import_guide.md"
 
 
+def test_powerbi_data_model_doc_exists_and_complete():
+    """Assert powerbi/02_data_model.md exists, specifies all relationships, Do Not Do list, and visual mapping."""
+    doc_path = config.POWERBI_DIR / "02_data_model.md"
+    assert doc_path.exists(), f"Missing {doc_path}"
+    assert doc_path.stat().st_size > 10000, f"Doc file too small: {doc_path.stat().st_size} bytes"
+
+    content = doc_path.read_text(encoding="utf-8")
+
+    # Star schema and Fact table center
+    assert "Fact_Transactions" in content
+    assert "Star Schema" in content or "star-schema" in content.lower()
+
+    # Core relationship targets
+    assert "Fact_Transactions[type]" in content
+    assert "Fact_Transactions[day]" in content
+    assert "Fact_Transactions[hour]" in content
+    assert "Fact_Transactions[alert_source]" in content
+    assert "Fact_Transactions[risk_band]" in content
+    assert "Fact_Transactions[amount_band]" in content
+
+    # Aggregate relationship targets
+    assert "Agg_ByType[type]" in content
+    assert "Agg_ByDay[day]" in content
+    assert "Agg_ByHour[hour]" in content
+    assert "Agg_ByDayType" in content
+    assert "Agg_ByAmountBandType" in content
+    assert "Agg_BySource" in content
+    assert "Agg_ByRiskBand" in content
+
+    # "Do not do" list items
+    assert "NEVER Use Bidirectional" in content or "bidirectional" in content.lower()
+    assert "KEEP Metrics_* Tables Disconnected" in content or "disconnected" in content.lower()
+    assert "DO NOT Use COUNTROWS(Fact_Transactions)" in content or "sampled" in content.lower()
+
+    # Visual mapping
+    assert "Visual-to-Table Mapping Matrix" in content
 
 
+def test_powerbi_dax_measures_file_exists_and_valid():
+    """Assert powerbi/03_measures.dax exists, contains all required DAX measures, and passes schema validation."""
+    dax_path = config.POWERBI_DIR / "03_measures.dax"
+    assert dax_path.exists(), f"Missing {dax_path}"
+    assert dax_path.stat().st_size > 10000, f"DAX file too small: {dax_path.stat().st_size} bytes"
+
+    content = dax_path.read_text(encoding="utf-8")
+
+    # Dedicated table instruction
+    assert "_Measures" in content
+    assert "Enter Data" in content
+
+    # Check required measures
+    required_measures = [
+        "[Total Transactions]",
+        "[Total Alerts]",
+        "[Total Flagged Value]",
+        "[Fraud Count]",
+        "[Fraud Rate %]",
+        "[Alert Rate %]",
+        "[True Positives]",
+        "[False Positives]",
+        "[False Negatives]",
+        "[True Negatives]",
+        "[Precision]",
+        "[Recall]",
+        "[False Positive Rate]",
+        "[F1 Score]",
+        "[Avg Alert Amount]",
+        "[Fraud Rate % by Type]",
+        "[Missed Fraud Value]",
+        "[Caught Fraud Value]",
+        "[Alerts Both]",
+        "[Alerts Rule Only]",
+        "[Alerts ML Only]",
+        "[Alert Rank]",
+        "[Dynamic Title - Selected Type]",
+        "[Color - Precision KPI Card]",
+        "[Color - Recall KPI Card]",
+    ]
+    for m in required_measures:
+        assert m in content, f"Measure {m} missing from 03_measures.dax"
+
+    # Division safety: ensure no raw arithmetic division
+    lines = [l for l in content.splitlines() if not l.strip().startswith("//") and not l.strip().startswith("/*")]
+    stripped = " ".join(lines)
+    assert not re.search(r"\]\s*/\s*\[", stripped), "Raw measure division detected without DIVIDE()!"
 
 
+def test_powerbi_kpi_cards_doc_exists_and_complete():
+    """Assert powerbi/04_kpi_cards.md exists, specifies all 6 cards, arithmetic coordinates, and interaction rules."""
+    kpi_path = config.POWERBI_DIR / "04_kpi_cards.md"
+    assert kpi_path.exists(), f"Missing {kpi_path}"
+    assert kpi_path.stat().st_size > 10000, f"KPI guide file too small: {kpi_path.stat().st_size} bytes"
 
+    content = kpi_path.read_text(encoding="utf-8")
+
+    # 6 cards specified
+    required_cards = [
+        "Total Transactions",
+        "Total Alerts",
+        "Total Flagged Value",
+        "Fraud Rate %",
+        "Alert Precision",
+        "Fraud Recall",
+    ]
+    for card in required_cards:
+        assert card in content, f"Card '{card}' missing from 04_kpi_cards.md"
+
+    # Coordinates and arithmetic
+    assert "1280" in content
+    assert "16 px" in content
+    assert "Edit interactions" in content
+    assert "Alert Source" in content
+    assert "Risk Band" in content
+    assert "Color - Precision KPI Card" in content
+    assert "Color - Recall KPI Card" in content
+
+
+def test_powerbi_page1_overview_doc_exists_and_complete():
+    """Assert powerbi/05_page1_overview.md exists, has complete spec, passes collision checks, and validates fields."""
+    from src.check_page1_layout import (
+        parse_markdown_visuals_table,
+        verify_layout,
+        verify_fields_in_csvs,
+    )
+
+    doc_path = config.POWERBI_DIR / "05_page1_overview.md"
+    assert doc_path.exists(), f"Missing {doc_path}"
+    assert doc_path.stat().st_size > 10000, f"Page 1 spec file too small: {doc_path.stat().st_size} bytes"
+
+    content = doc_path.read_text(encoding="utf-8")
+
+    # 1. Page title and metadata
+    assert "Executive Overview" in content
+    assert "1280 x 720" in content
+
+    # 2. ASCII Wireframe presence
+    assert "CANVAS: 1280 x 720 PIXELS" in content
+    assert "VIS-01A" in content
+    assert "VIS-07" in content
+
+    # 3. Static takeaway with computed metrics
+    assert "0.769%" in content
+    assert "0.184%" in content
+    assert "0.000%" in content
+    assert "8,213" in content
+
+    # 4. Required visuals present in markdown table
+    required_visual_ids = [
+        "VIS-01A", "VIS-01B", "VIS-01C", "VIS-01D", "VIS-01E", "VIS-01F",
+        "VIS-02", "VIS-03A", "VIS-03B", "VIS-03C", "VIS-03D",
+        "VIS-04", "VIS-05", "VIS-06", "VIS-07"
+    ]
+    visuals = parse_markdown_visuals_table(doc_path)
+    found_ids = [v["clean_id"] for v in visuals]
+    for vid in required_visual_ids:
+        assert vid in found_ids, f"Visual ID {vid} missing from markdown table"
+
+    # 5. Programmatic collision and canvas bounds check
+    verify_layout(visuals)
+
+    # 6. Field existence in exported CSVs
+    verify_fields_in_csvs(visuals)
+
+
+def test_powerbi_page2_and_page3_docs_and_unified_check():
+    """Assert powerbi/06_page2_detection.md and powerbi/07_page3_investigation.md exist and pass layout verification."""
+    from powerbi.check_layout import (
+        load_csv_schemas,
+        verify_page,
+    )
+
+    page2_path = config.POWERBI_DIR / "06_page2_detection.md"
+    page3_path = config.POWERBI_DIR / "07_page3_investigation.md"
+
+    assert page2_path.exists(), f"Missing {page2_path}"
+    assert page3_path.exists(), f"Missing {page3_path}"
+    assert page2_path.stat().st_size > 10000, f"Page 2 spec too small: {page2_path.stat().st_size} bytes"
+    assert page3_path.stat().st_size > 15000, f"Page 3 spec too small: {page3_path.stat().st_size} bytes"
+
+    p2_content = page2_path.read_text(encoding="utf-8")
+    assert "Rules vs ML" in p2_content
+    assert "VIS-08" in p2_content
+    assert "VIS-09" in p2_content
+    assert "VIS-10" in p2_content
+    assert "VIS-11" in p2_content
+    assert "VIS-12" in p2_content
+
+    p3_content = page3_path.read_text(encoding="utf-8")
+    assert "Investigation" in p3_content
+    assert "VIS-13A" in p3_content
+    assert "VIS-14" in p3_content
+    assert "VIS-15" in p3_content
+    assert "VIS-16" in p3_content
+    assert "Account Detail" in p3_content
+    assert "DT-01" in p3_content
+    assert "DT-04" in p3_content
+
+    # Run unified audit
+    csv_schemas = load_csv_schemas()
+    p2_visuals = verify_page(page2_path, csv_schemas)
+    assert p2_visuals >= 5, f"Expected at least 5 visuals on Page 2, got {p2_visuals}"
+
+    p3_visuals = verify_page(page3_path, csv_schemas)
+    assert p3_visuals >= 12, f"Expected at least 12 visuals on Page 3 (including sub-page), got {p3_visuals}"
+
+
+def test_powerbi_interactions_doc_exists_and_complete():
+    """Assert powerbi/08_interactions.md exists and contains complete sync, interaction, bookmark, and tooltip specs."""
+    inter_path = config.POWERBI_DIR / "08_interactions.md"
+    assert inter_path.exists(), f"Missing {inter_path}"
+    assert inter_path.stat().st_size > 15000, f"Interactions file too small: {inter_path.stat().st_size} bytes"
+
+    content = inter_path.read_text(encoding="utf-8")
+
+    # 1. Slicer synchronization
+    assert "View > Sync slicers" in content
+    assert "Sync_PaymentType" in content
+    assert "Sync_DayRange" in content
+    assert "Dim_Type[type]" in content
+    assert "Dim_Day[day]" in content
+    assert "Dim_AlertSource[alert_source]" in content
+    assert "Dim_RiskBand[risk_band]" in content
+
+    # 2. Edit-Interactions rules
+    assert "Edit interactions" in content
+    assert "Total Transactions" in content
+    assert "VIS-01A" in content
+    assert "VIS-04" in content
+    assert "VIS-05" in content
+
+    # 3. Bookmarks
+    assert "All transactions" in content
+    assert "Fraud-prone types only (TRANSFER + CASH_OUT)" in content
+    assert "Critical risk only" in content
+    assert "Reset filters" in content
+
+    # 4. Navigation & Alert Definition Tooltip
+    assert "Page navigator" in content
+    assert "Tooltip - Alert Definition" in content
+    assert "7 heuristic SQL rules" in content
+    assert "Isolation Forest" in content
+
+    # 5. Tooltip page for VIS-04
+    assert "Tooltip - Type Details" in content
+    assert "TT-01" in content
+    assert "TT-02" in content
+    assert "TT-03" in content
+    assert "TT-04" in content
+    assert "TT-05" in content
+
+
+def test_powerbi_theme_and_design_doc_exists_and_valid():
+    """Assert fraud_theme.json is valid Power BI theme and 09_design.md contains palette and >= 4.5 contrast ratios."""
+    import json
+    theme_path = config.POWERBI_DIR / "fraud_theme.json"
+    design_path = config.POWERBI_DIR / "09_design.md"
+
+    assert theme_path.exists(), f"Missing {theme_path}"
+    assert design_path.exists(), f"Missing {design_path}"
+
+    # 1. Validate theme JSON
+    with open(theme_path, "r", encoding="utf-8") as f:
+        theme = json.load(f)
+
+    assert theme["name"] == "Fraud Monitor"
+    assert len(theme["dataColors"]) >= 8
+    assert "foreground" in theme
+    assert "background" in theme
+    assert "tableAccent" in theme
+    assert "good" in theme and "neutral" in theme and "bad" in theme
+    assert "visualStyles" in theme
+    for v in ["card", "slicer", "table", "lineChart", "clusteredBarChart"]:
+        assert v in theme["visualStyles"], f"Visual style {v} missing in theme"
+
+    # 2. Validate design document content
+    content = design_path.read_text(encoding="utf-8")
+    assert "Fraud Monitor" in content
+    assert "16 px" in content
+    assert "Single Alert Accent Color per Page Rule" in content
+    assert "0.000%" in content
+    assert "WCAG" in content
+    assert "Contrast Ratio" in content
+
+    # 3. Compute and assert all contrast ratios in design doc are >= 4.5
+    from src.build_design_theme import CONTRAST_AUDIT_PAIRS, contrast_ratio
+
+    for item in CONTRAST_AUDIT_PAIRS:
+        cr = contrast_ratio(item["fg"], item["bg"])
+        assert cr >= 4.5, f"Contrast ratio {cr:.2f} for {item['element']} is below 4.5:1!"
+
+
+def test_readme_and_phase1_runner_integrity():
+    """Assert README.md exists, regenerates cleanly without placeholders, and run_phase1.py exists."""
+    from src.build_readme import generate_readme_content, README_PATH
+
+    assert README_PATH.exists(), "README.md does not exist"
+    assert (config.PROJECT_ROOT / "src" / "run_phase1.py").exists(), "src/run_phase1.py missing"
+
+    content = generate_readme_content()
+    assert len(content) > 10000, f"README content too small: {len(content)} chars"
+
+    # Verify no placeholder strings
+    for pattern in [r"\bTODO\b", r"\bTBD\b", r"\bX%\b", r"\[Insert", r"\[TBD"]:
+        match = re.search(pattern, content)
+        assert not match, f"Placeholder pattern {pattern} found in README!"
+
+    # Key metric numbers present
+    assert "6,362,620" in content
+    assert "8,213" in content
+    assert "0.129%" in content
+    assert "1,085,609" in content
+    assert "99.79%" in content
+    assert "98.65%" in content
+    assert "TRANSFER" in content
+    assert "CASH_OUT" in content
+
+
+def test_final_audit_suite_passes():
+    """Assert src/final_audit.py passes all 10 consistency checks."""
+    from src.final_audit import AuditRunner
+    runner = AuditRunner()
+    success = runner.run_all()
+    assert success, "One or more checks in src/final_audit.py failed!"

@@ -3,8 +3,8 @@
 ## 1. Executive Summary
 
 - **Total Transactions:** 6,362,620
-- **Total Columns:** 11
-- **Memory Footprint:** 497.35 MB
+- **Total Columns:** 24
+- **Memory Footprint:** 679.38 MB
 - **Total Null Values:** 0
 - **Total Fraudulent Transactions:** 8,213
 - **Overall Fraud Rate:** 0.1291% (~0.129%)
@@ -14,7 +14,10 @@
 
 | Column | Data Type | Null Count | Null % |
 |---|---|---|---|
+| `txn_id` | `int32` | 0 | 0.00% |
 | `step` | `int16` | 0 | 0.00% |
+| `day` | `int8` | 0 | 0.00% |
+| `hour` | `int8` | 0 | 0.00% |
 | `type` | `category` | 0 | 0.00% |
 | `amount` | `float64` | 0 | 0.00% |
 | `nameOrig` | `string` | 0 | 0.00% |
@@ -23,6 +26,16 @@
 | `nameDest` | `string` | 0 | 0.00% |
 | `oldbalanceDest` | `float64` | 0 | 0.00% |
 | `newbalanceDest` | `float64` | 0 | 0.00% |
+| `errOrig` | `float64` | 0 | 0.00% |
+| `errDest` | `float64` | 0 | 0.00% |
+| `destIsMerchant` | `int8` | 0 | 0.00% |
+| `origEmptied` | `int8` | 0 | 0.00% |
+| `destBalanceUnchanged` | `int8` | 0 | 0.00% |
+| `origInconsistent` | `int8` | 0 | 0.00% |
+| `destInconsistent` | `int8` | 0 | 0.00% |
+| `isAmountOutlierIQR` | `int8` | 0 | 0.00% |
+| `isTop1PctAmount` | `int8` | 0 | 0.00% |
+| `isDuplicateRow` | `int8` | 0 | 0.00% |
 | `isFraud` | `int8` | 0 | 0.00% |
 | `isFlaggedFraud` | `int8` | 0 | 0.00% |
 

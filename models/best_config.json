@@ -9,7 +9,7 @@
   "recall": 0.646379,
   "fpr": 0.001106,
   "f1": 0.640531,
-  "train_seconds": 1.366,
+  "train_seconds": 1.38,
   "selection_metric": "validation_pr_auc",
   "tie_breaker": "higher_f1_then_shorter_train_seconds"
 }

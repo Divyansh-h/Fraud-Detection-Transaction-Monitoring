@@ -1,7 +1,7 @@
 # Phase 3 Machine Learning Summary: Anomaly Detection Architecture & Evaluation
 
 **Document ID:** `13_phase3_summary.md`  
-**Execution Timestamp:** 2026-10-21 16:04:48 UTC  
+**Execution Timestamp:** 2026-10-22 16:59:00 UTC  
 **Model Family:** Unsupervised Isolation Forest (`sklearn.ensemble.IsolationForest`)  
 **Scope of Application:** `TRANSFER` and `CASH_OUT` transactions only ($N = 2,770,409$)  
 **Evaluation Principle:** Model selection and operating threshold calibration performed strictly on Validation ($N = 554,082$); Test set ($N = 554,082$) evaluated strictly once.
@@ -20,7 +20,7 @@ The winning configuration was determined via systematic grid sweep over tree dep
 | **Nominal Contamination (`contamination`)** | **0.003** | Calibrated to expected domain fraud prevalence (~0.30%) |
 | **Feature Set** | **Set A** (13 features) | Delivered +40.09% PR-AUC improvement over rule-free baseline (Set B) |
 | **Training Dataset Size** | **1,662,245 rows** | Trained on the FULL training partition without subsampling |
-| **Training Duration** | **1.37 seconds** | High computational throughput suitable for high-frequency deployment |
+| **Training Duration** | **1.38 seconds** | High computational throughput suitable for high-frequency deployment |
 
 ---
 
